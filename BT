@@ -1,0 +1,106 @@
+#####################
+BINARY TREES: Nodes at level 1 and degree of nodes at level 1
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Scanner;
+
+class Node {
+    String data;
+    Node left, right;
+
+    public Node(String item) {
+        data = item;
+        left = right = null;
+    }
+}
+
+public class Solution {
+    Node root;
+
+    public int getNumberOfNodesAtLevel(Node node, int level) {
+        if (node == null)
+            return 0;
+
+        if (level == 0)
+            return 1;
+
+        return getNumberOfNodesAtLevel(node.left, level - 1) + getNumberOfNodesAtLevel(node.right, level - 1);
+    }
+
+    public int[] getDegreeOfNodesAtLevel(Node node, int level) {
+        if (node == null)
+            return new int[0];
+
+        if (level == 0) {
+            int degree = 0;
+            if (node.left != null)
+                degree++;
+            if (node.right != null)
+                degree++;
+            return new int[]{degree};
+        }
+
+        int[] leftDegrees = getDegreeOfNodesAtLevel(node.left, level - 1);
+        int[] rightDegrees = getDegreeOfNodesAtLevel(node.right, level - 1);
+
+        int[] degreeCount = new int[leftDegrees.length + rightDegrees.length];
+        int index = 0;
+
+        for (int degree : leftDegrees) {
+            degreeCount[index++] = degree;
+        }
+
+        for (int degree : rightDegrees) {
+            degreeCount[index++] = degree;
+        }
+
+        return degreeCount;
+    }
+
+    public static void main(String[] args) {
+        Solution tree = new Solution();
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of nodes: ");
+        int n = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.print("Enter the binary tree nodes separated by space: ");
+        String input = scanner.nextLine();
+        String[] treeArray = input.split(" ");
+
+        Map<Integer, Node> nodeMap = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            nodeMap.put(i, new Node(treeArray[i]));
+        }
+
+        for (int i = 0; i < n; i++) {
+            Node currentNode = nodeMap.get(i);
+            if (!treeArray[i].equals("-1")) {
+                int leftIndex = 2 * i + 1;
+                int rightIndex = 2 * i + 2;
+
+                if (leftIndex < n && !treeArray[leftIndex].equals("-1"))
+                    currentNode.left = nodeMap.get(leftIndex);
+
+                if (rightIndex < n && !treeArray[rightIndex].equals("-1"))
+                    currentNode.right = nodeMap.get(rightIndex);
+            }
+        }
+
+        // Set the root node
+        tree.root = nodeMap.get(0);
+
+        int level = 1;
+        int numberOfNodes = tree.getNumberOfNodesAtLevel(tree.root, level);
+        int[] degreeCount = tree.getDegreeOfNodesAtLevel(tree.root, level);
+
+        System.out.println("Number of nodes at level " + level + ": " + numberOfNodes);
+        System.out.print("Degree of each node at level " + level + ": ");
+        for (int degree : degreeCount) {
+            System.out.print(degree + " ");
+        }
+    }
+}
